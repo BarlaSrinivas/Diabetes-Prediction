@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Risk Assessment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e6f3fe 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+        }
+
+        h1 {
+            color: #2563eb;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2.2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #1e40af;
+            font-weight: 500;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 10px;
+            top: 38px;
+            color: #93c5fd;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: 2px solid #dbeafe;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px #bfdbfe;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+            width: 200px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .result-card {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            background: #f8fafc;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .diabetic {
+            color: #dc2626;
+            background: #fee2e2;
+        }
+
+        .not-diabetic {
+            color: #16a34a;
+            background: #dcfce7;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-heartbeat"></i> Diabetes Risk Assessment</h1>
+        <form action="/predict" method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label><i class="fas fa-baby input-icon"></i> Pregnancies</label>
+                    <input type="number" name="pregnancies" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-tint input-icon"></i> Glucose (mg/dL)</label>
+                    <input type="number" name="glucose" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-heart input-icon"></i> Blood Pressure (mm Hg)</label>
+                    <input type="number" name="bloodpressure" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-ruler-vertical input-icon"></i> Skin Thickness (mm)</label>
+                    <input type="number" name="skinthickness" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-syringe input-icon"></i> Insulin (μU/mL)</label>
+                    <input type="number" name="insulin" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-weight input-icon"></i> BMI</label>
+                    <input type="number" step="0.1" name="bmi" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-dna input-icon"></i> Diabetes Pedigree</label>
+                    <input type="number" step="0.001" name="dpf" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-birthday-cake input-icon"></i> Age</label>
+                    <input type="number" name="age" required>
+                </div>
+            </div>
+            <button type="submit">Check Risk <i class="fas fa-arrow-right"></i></button>
+        </form>
+
+        {% if prediction_text %}
+        <div class="result-card {{ 'diabetic' if 'Diabetic' in prediction_text and 'Not' not in prediction_text else 'not-diabetic' }}">
+            <h3><i class="fas fa-{{ 'check-circle'  if 'Not' in prediction_text else 'exclamation-triangle' }}"></i> 
+                {{ prediction_text }}</h3>
+            <p>{{ 'Awesome, please maintain your healthy habits!' if 'Not' in prediction_text else 'Please consult your healthcare provider' }}</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
